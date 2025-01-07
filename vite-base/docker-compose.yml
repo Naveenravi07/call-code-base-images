@@ -1,0 +1,27 @@
+version: "0.1"
+services:
+  websocket:
+    container_name: ${SERVICE_NAME}ws
+    build:
+      context: ../ws-runner
+      dockerfile: Dockerfile
+    volumes:
+      - code_volume:/code
+    ports:
+      - 0:8080
+
+  vite:
+    container_name: ${SERVICE_NAME}vite
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - code_volume:/usr/src/app
+    ports:
+      - 0:5173
+
+
+volumes:
+  code_volume:  
+    name: ${VOLUME_NAME}  
+    external: true
