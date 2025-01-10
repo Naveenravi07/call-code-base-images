@@ -1,7 +1,7 @@
 version: "0.1"
 services:
   websocket:
-    container_name: ${SERVICE_NAME}ws
+    container_name: ${SERVICE_NAME}-ws
     build:
       context: ../ws-runner
       dockerfile: Dockerfile
@@ -9,9 +9,8 @@ services:
       - code_volume:/code
     ports:
       - 0:8080
-
   vite:
-    container_name: ${SERVICE_NAME}vite
+    container_name: ${SERVICE_NAME}-service
     build:
       context: .
       dockerfile: Dockerfile
@@ -25,3 +24,8 @@ volumes:
   code_volume:  
     name: ${VOLUME_NAME}  
     external: true
+
+
+## Running multiple services 
+# VOLUME_NAME="local_test" SERVICE_NAME="playground_1" sudo -E docker-compose -p playground1  up
+# VOLUME_NAME="local_test2" SERVICE_NAME="playground_2" sudo -E docker-compose -p playground2  up
