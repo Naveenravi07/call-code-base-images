@@ -28,7 +28,7 @@ func main() {
 
 	http.HandleFunc("/", echo)
 	http.HandleFunc("/ws", webSocketHandler)
-	http.Handle("/static/", http.StripPrefix("/static", fs))
+	http.Handle("/files/", http.StripPrefix("/files", fs))
 
     fmt.Println("websocket server starting in port 8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
