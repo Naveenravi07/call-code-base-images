@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/gorilla/websocket"
 )
@@ -89,7 +88,6 @@ func customFileHandler(dir string) http.HandlerFunc {
 }
 
 func main() {
-	// Serve files from /code
 	dir := "/code"
 	http.Handle("/files/", http.StripPrefix("/files", customFileHandler(dir)))
 
