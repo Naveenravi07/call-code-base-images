@@ -26,45 +26,74 @@ type Message struct {
 	Content  string `json:"content"`
 }
 
+// Response format for JSON responses
+type DirectoryListing struct {
+	Path  string   `json:"path"`
+	Files []string `json:"files"`
+}
+
 func customFileHandler(dir string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		filePath := filepath.Join(dir, r.URL.Path)
 
+		// Check if requested path is a directory
 		if stat, err := os.Stat(filePath); err == nil && stat.IsDir() {
-			// Serve index.html if explicitly requested
-			if strings.HasSuffix(r.URL.Path, "index.html") {
-				http.ServeFile(w, r, filepath.Join(filePath, "index.html"))
-				return
-			}
-
-			// Serve directory listing
+			// Serve JSON directory listing
 			files, err := ioutil.ReadDir(filePath)
 			if err != nil {
-				http.Error(w, "Unable to read directory", http.StatusInternalServerError)
+				http.Error(w, `{"error": "Unable to read directory"}`, http.StatusInternalServerError)
 				return
 			}
 
-			// Generate a simple HTML listing
-			fmt.Fprint(w, "<pre>")
+			var fileList []string
 			for _, file := range files {
-				name := file.Name()
 				if file.IsDir() {
-					name += "/"
+					fileList = append(fileList, file.Name()+"/")
+				} else {
+					fileList = append(fileList, file.Name())
 				}
-				fmt.Fprintf(w, `<a href="%s">%s</a><br>`, filepath.Join(r.URL.Path, name), name)
 			}
-			fmt.Fprint(w, "</pre>")
+
+			response := DirectoryListing{
+				Path:  r.URL.Path,
+				Files: fileList,
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(response)
 			return
 		}
 
-		http.ServeFile(w, r, filePath)
+		// If it's a file, return the content as JSON
+		if _, err := os.Stat(filePath); err == nil {
+			content, err := ioutil.ReadFile(filePath)
+			if err != nil {
+				http.Error(w, `{"error": "Unable to read file"}`, http.StatusInternalServerError)
+				return
+			}
+
+			// Return the file content in JSON format
+			response := map[string]interface{}{
+				"file":     r.URL.Path,
+				"content":  string(content),
+			}
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(response)
+			return
+		}
+
+		// File or directory not found
+		w.Header().Set("Content-Type", "application/json")
+		http.Error(w, `{"error": "File or directory not found"}`, http.StatusNotFound)
 	}
 }
 
 func main() {
+	// Serve files from /code
 	dir := "/code"
 	http.Handle("/files/", http.StripPrefix("/files", customFileHandler(dir)))
 
+	// WebSocket and other handlers
 	http.HandleFunc("/", echo)
 	http.HandleFunc("/ws", webSocketHandler)
 
@@ -97,7 +126,7 @@ func webSocketHandler(w http.ResponseWriter, r *http.Request) {
 		err = json.Unmarshal(message, &msg)
 		if err != nil {
 			log.Println("JSON unmarshal error:", err)
-			conn.WriteMessage(websocket.TextMessage, []byte("Invalid message format"))
+			conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "Invalid message format"}`))
 			continue
 		}
 
@@ -106,11 +135,11 @@ func webSocketHandler(w http.ResponseWriter, r *http.Request) {
 		err = ioutil.WriteFile(msg.FileName, []byte(msg.Content), 0644)
 		if err != nil {
 			log.Println("Write file error:", err)
-			conn.WriteMessage(websocket.TextMessage, []byte("Error writing file"))
+			conn.WriteMessage(websocket.TextMessage, []byte(`{"error": "Error writing file"}`))
 			continue
 		}
 
-		conn.WriteMessage(websocket.TextMessage, []byte("File edited successfully"))
+		conn.WriteMessage(websocket.TextMessage, []byte(`{"status": "File edited successfully"}`))
 	}
 }
 
