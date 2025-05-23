@@ -1,0 +1,51 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: callcode-session-s1
+  labels:
+    app: callcode 
+    session-id: s1
+    user-id: u1
+spec:
+  template:
+    metadata:
+      labels:
+        app: callcode 
+        session-id: s1
+        user-id: u1
+
+    spec:
+      volumes:
+      - name: code-volume
+        emptyDir: {}
+
+      initContainers:
+      - name: copy-code
+        image: shastri123/callcode-vite
+        command: ["sh", "-c", "cp -r /usr/src/app/* /shared && cp -r /usr/src/app/.[^.]* /shared"]
+        volumeMounts:
+        - name: code-volume
+          mountPath: /shared
+ 
+
+      containers:
+      - name: user-service
+        image: shastri123/callcode-vite
+        ports:
+        - containerPort: 5173
+        volumeMounts:
+        - name: code-volume
+          mountPath: /usr/src/app
+
+      - name: websocket 
+        image: shastri123/callcode-ws
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - name: code-volume
+          mountPath: /code 
+
+      restartPolicy: Never
+
+  backoffLimit: 4
+
