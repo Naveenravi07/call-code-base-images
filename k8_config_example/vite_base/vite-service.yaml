@@ -6,17 +6,15 @@ metadata:
     app: callcode
     session-id: s1
 spec:
-  type: NodePort
   selector:
-    app: callcode 
+    app: callcode
     session-id: s1
-    user-id: u1
   ports:
-  - name: service-port
+  - name: http
     port: 80
     targetPort: 5173
-  - name: websocket-port
+    protocol: TCP
+  - name: websocket
     port: 8080
     targetPort: 8080
-
-
+    protocol: TCP
