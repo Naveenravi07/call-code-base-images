@@ -9,6 +9,8 @@ metadata:
 spec:
   template:
     metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
       labels:
         app: callcode 
         session-id: s1
@@ -48,4 +50,3 @@ spec:
       restartPolicy: Never
 
   backoffLimit: 4
-
