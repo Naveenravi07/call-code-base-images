@@ -1,0 +1,27 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: callcode-session-s1
+spec:
+  hosts:
+    - "s1.call-code.local"
+    - "ws.s1.call-code.local"
+  gateways:
+    - callcode-gateway
+  http:
+    - match:
+        - headers:
+            ":authority":
+              exact: "ws.s1.call-code.local"
+      route:
+        - destination:
+            host: callcode-session-s1.default.svc.cluster.local
+            port:
+              number: 8080
+    - route:
+        - destination:
+            host: callcode-session-s1.default.svc.cluster.local
+            port:
+              number: 80
+
+
