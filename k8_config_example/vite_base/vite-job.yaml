@@ -40,7 +40,7 @@ spec:
           mountPath: /usr/src/app
 
       - name: websocket 
-        image: shastri123/callcode-ws
+        image: callcode-ws
         ports:
         - containerPort: 8080
         volumeMounts:

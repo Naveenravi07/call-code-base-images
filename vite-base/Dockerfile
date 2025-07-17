@@ -1,4 +1,4 @@
-FROM node:lts-buster AS development
+FROM node:alpine AS development
 
 WORKDIR /usr/src/app
 
