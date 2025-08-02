@@ -173,6 +173,7 @@ func checkPermissions(path string) (readable, writable bool) {
 func customFileHandler(dir string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
+		enableCors(&w)
 
 		recursive := r.URL.Query().Get("recursive") == "true"
 
@@ -529,6 +530,12 @@ func handleDirCreate(conn *websocket.Conn, msg Message) {
 		"dirname": msg.FileName,
 	}
 	conn.WriteJSON(response)
+}
+
+func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+	(*w).Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE")
+	(*w).Header().Set("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With")
 }
 
 func main() {
