@@ -52,6 +52,5 @@ func (h *FileHandler) ListFiles(c *gin.Context) {
 			Type: fileType,
 		})
 	}
-
 	c.JSON(200, files)
 }

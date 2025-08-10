@@ -14,6 +14,7 @@ func main() {
 	cfg := config.LoadConfig()
 
 	r := gin.Default()
+	r.Use(CORSMiddleware())
 	setupRoutes(r, cfg)
 
 	fmt.Printf("Server starting on port %s\n", cfg.Port)
@@ -28,4 +29,21 @@ func setupRoutes(r *gin.Engine, cfg *config.Config) {
 
 	fileHandler := handlers.NewFileHandler(cfg)
 	fileHandler.RegisterRoutes(r)
+}
+
+func CORSMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Credentials", "true")
+		c.Header("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		c.Header("Access-Control-Allow-Methods", "POST, HEAD, PATCH, OPTIONS, GET, PUT")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		c.Next()
+	}
 }
