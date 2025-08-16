@@ -3,8 +3,9 @@ package config
 import "os"
 
 type Config struct {
-	Port    string
-	CodeDir string
+	Port        string
+	CodeDir     string
+	SessionName string
 }
 
 func LoadConfig() *Config {
@@ -18,8 +19,11 @@ func LoadConfig() *Config {
 		codeDir = "/code"
 	}
 
+	sessionName := "callcode-session-" + os.Getenv("CALLCODE_SESSION_NAME")
+
 	return &Config{
-		Port:    port,
-		CodeDir: codeDir,
+		Port:        port,
+		CodeDir:     codeDir,
+		SessionName: sessionName,
 	}
 }

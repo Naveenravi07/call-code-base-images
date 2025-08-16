@@ -30,6 +30,9 @@ func setupRoutes(r *gin.Engine, cfg *config.Config) {
 
 	fileHandler := handlers.NewFileHandler(cfg)
 	fileHandler.RegisterRoutes(r)
+
+	terminalHandler := handlers.SetupTerminalHandler(cfg)
+	terminalHandler.RegisterRoutes(r)
 }
 
 func CORSMiddleware() gin.HandlerFunc {
