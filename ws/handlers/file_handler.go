@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"sort"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -91,20 +92,23 @@ func buildFileTree(absPath string, relPath string) (*FileNode, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	node := &FileNode{
 		ID:   genID(absPath),
 		Name: info.Name(),
 		Type: "folder",
 		Path: "/" + relPath,
 	}
+
 	entries, err := os.ReadDir(absPath)
 	if err != nil {
 		return nil, err
 	}
+
 	for _, entry := range entries {
 		if entry.IsDir() {
-			excluded := []string {"__pycache__", "node_modules", ".git", ".github", ".vscode", ".idea"}
-			if  slices.Contains(excluded, entry.Name()) {
+			excluded := []string{"__pycache__", "node_modules", ".git", ".github", ".vscode", ".idea"}
+			if slices.Contains(excluded, entry.Name()) {
 				continue
 			}
 			child, err := buildFileTree(
@@ -127,8 +131,18 @@ func buildFileTree(absPath string, relPath string) (*FileNode, error) {
 			node.Children = append(node.Children, child)
 		}
 	}
+
+	sort.Slice(node.Children, func(i, j int) bool {
+		a, b := node.Children[i], node.Children[j]
+		if a.Type != b.Type {
+			return a.Type == "folder" 
+		}
+		return strings.ToLower(a.Name) < strings.ToLower(b.Name)
+	})
+
 	return node, nil
 }
+
 
 func genID(path string) string {
 	hash := md5.Sum([]byte(path))
