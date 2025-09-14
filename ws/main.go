@@ -31,6 +31,12 @@ func setupRoutes(r *gin.Engine, cfg *config.Config) {
 	fileHandler := handlers.NewFileHandler(cfg)
 	fileHandler.RegisterRoutes(r)
 
+	folderHandler := handlers.NewFolderHandler(cfg)
+	folderHandler.RegisterRoutes(r)
+	
+	nodeHandler := handlers.NewNodeHandler(cfg)
+	nodeHandler.RegisterRoutes(r)
+
 	terminalHandler := handlers.SetupTerminalHandler(cfg)
 	terminalHandler.RegisterRoutes(r)
 }

@@ -34,6 +34,7 @@ func (h *FileHandler) RegisterRoutes(r *gin.Engine) {
 	r.GET("/api/files", h.ListFiles)
 	r.GET("/api/files/content",h.GetFileContent)
 	r.POST("/api/files/content", h.SaveFileContent)
+	r.POST("/api/files/create",h.NewFileCreate)
 }
 
 func (h *FileHandler) ListFiles(c *gin.Context) {
@@ -84,6 +85,51 @@ func (h *FileHandler) SaveFileContent(c *gin.Context) {
     }
 
     c.Status(200)
+}
+
+type newFileRequest struct{
+	Name string `json:"name"`
+	Path string `json:"path"`
+}
+
+func (h *FileHandler) NewFileCreate(c *gin.Context){
+	var req newFileRequest
+	if err := c.BindJSON(&req); err != nil{
+		c.JSON(400,gin.H{"error": "Invalid req body"})
+		return
+	}
+	
+	if req.Path == "" {
+		c.JSON(400, gin.H{"error": "path is required"})
+		return
+	}
+
+	cleanPath := strings.TrimPrefix(req.Path, "/")
+	cleanPath = filepath.Clean(cleanPath)
+	absPath := filepath.Join(h.cfg.CodeDir, cleanPath)
+
+	if err := os.MkdirAll(filepath.Dir(absPath), os.ModePerm); err != nil {
+		c.JSON(500, gin.H{"error": "failed to create directories"})
+		return
+	}
+
+	if _, err := os.Stat(absPath); err == nil {
+		c.JSON(409, gin.H{"error": "file already exists"})
+		return
+	}
+
+	f, err := os.Create(absPath)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "failed to create file"})
+		return
+	}
+	defer f.Close()
+
+	c.JSON(201, gin.H{
+		"message":  "file created successfully",
+		"fileName": req.Name,
+		"filePath": cleanPath,
+	})
 }
 
 
