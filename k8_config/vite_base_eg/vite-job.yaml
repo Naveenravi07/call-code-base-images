@@ -1,0 +1,52 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: callcode-session-s1
+  labels:
+    app: callcode
+    session-id: s1
+    user-id: u1
+spec:
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: callcode
+        session-id: s1
+        user-id: u1
+    spec:
+      volumes:
+        - name: code-volume
+          emptyDir: {}
+
+      initContainers:
+        - name: copy-code
+          image: shastri123/callcode-vite
+          command: ["sh", "-c", "cp -r /home/coder/workspace/* /shared && cp -r /home/coder/workspace/.[^.]* /shared"]
+          volumeMounts:
+            - name: code-volume
+              mountPath: /shared
+          securityContext:
+            runAsUser: 0   # force root inside init container
+
+      containers:
+        - name: user-service
+          image: shastri123/callcode-vite
+          ports:
+            - containerPort: 5173
+          volumeMounts:
+            - name: code-volume
+              mountPath: /home/coder/workspace
+
+        - name: websocket
+          image: callcode-ws
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: code-volume
+              mountPath: /home/coder/workspace
+
+      restartPolicy: Never
+
+  backoffLimit: 4
