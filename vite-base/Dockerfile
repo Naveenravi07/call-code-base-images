@@ -10,9 +10,9 @@ COPY --chown=coder:coder package.json package-lock.json ./
 
 USER coder
 
-RUN npm ci
 
 COPY --chown=coder:coder . .
 
 EXPOSE 5173
-CMD ["npm", "run", "dev", "--", "--host"]
+
+CMD ["tail", "-f", "/dev/null"]

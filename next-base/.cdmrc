@@ -1,0 +1,5 @@
+{
+  "commands": ["npm install", "exec npm run dev"],
+  "isLongLivedTask": true,
+  "tabs": ["src/app/page.tsx"]
+}

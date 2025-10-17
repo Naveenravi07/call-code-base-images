@@ -33,7 +33,7 @@ func setupRoutes(r *gin.Engine, cfg *config.Config) {
 
 	folderHandler := handlers.NewFolderHandler(cfg)
 	folderHandler.RegisterRoutes(r)
-	
+
 	nodeHandler := handlers.NewNodeHandler(cfg)
 	nodeHandler.RegisterRoutes(r)
 
@@ -42,18 +42,17 @@ func setupRoutes(r *gin.Engine, cfg *config.Config) {
 }
 
 func CORSMiddleware() gin.HandlerFunc {
-    return func(c *gin.Context) {
-        c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-        c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-        c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, Accept, Origin, Cache-Control, X-Requested-With")
-        c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, PATCH, DELETE")
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, Accept, Origin, Cache-Control, X-Requested-With")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, PATCH, DELETE")
 
-        if c.Request.Method == http.MethodOptions {
-            c.AbortWithStatus(http.StatusNoContent)
-            return
-        }
+		if c.Request.Method == http.MethodOptions {
+			c.AbortWithStatus(http.StatusNoContent)
+			return
+		}
 
-        c.Next()
-    }
+		c.Next()
+	}
 }
-
