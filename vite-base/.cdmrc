@@ -1,5 +1,5 @@
 {
-  "commands": ["npm install", "exec npm run dev"],
+  "commands": ["bun install", "exec bun run dev"],
   "isLongLivedTask": true,
   "tabs": ["src/App.jsx"]
 }
